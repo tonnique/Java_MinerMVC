@@ -1,9 +1,9 @@
-package Controller;
+package ru.antony.Controller;
 
-import Model.IGameSettings;
-import Model.MinerModel;
-import View.MinerPanel;
-import View.SettingsDialog;
+import ru.antony.Model.IGameSettings;
+import ru.antony.Model.MinerModel;
+import ru.antony.View.IMinerView;
+import ru.antony.View.SettingsDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,59 +16,14 @@ import java.awt.event.MouseListener;
  */
 public class SwingMinerController extends MinerController implements MouseListener, ActionListener {
 
-    //JFrame frame;
     SettingsDialog settings;
-    MinerModel model;
 
-    //public SwingMinerController(JFrame f) { frame = f; }
-
-    public SwingMinerController(MinerModel m) {super(m); model = m;}
-
-    //@Override
-    public void actionPerformed(ActionEvent e) {
-
-        if (e.getSource() instanceof JMenuItem) {
-            JMenuItem srcMI = (JMenuItem) e.getSource();
-            if (srcMI.getActionCommand() == "Settings") {
-                if (settings  == null)
-                    settings = new SettingsDialog((JFrame) view );
-
-                settings.setVisible(true);
-                if(settings.isUserConfirmed()) {
-                    startNewGame();
-                }
-            }
-        }
-        else if (e.getSource() instanceof  JButton) {
-            JButton srcButton = (JButton) e.getSource();
-            if (srcButton.getActionCommand() == "Restart") {
-                super.startNewGame();
-            }
-        }
-    }
-
-    protected int[] getGameSettings() {
-        if (settings == null) {
-            return new int[] {IGameSettings.BEGINNER_MINEFIELD_HEIGHT, IGameSettings.BEGINNER_MINEFIELD_WIDTH,
-                    IGameSettings.BEGINNER_NUM_OF_BOMBS};
-        }
-        else {
-
-            return new int[] {settings.getFieldHeight(),
-                    settings.getFieldWidth(), settings.getBombsNumber()};
-        }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {}
-
-    @Override
-    public void mousePressed(MouseEvent e) {}
+    public SwingMinerController(MinerModel m) {super(m); }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int row = e.getY() / MinerPanel.labelHeight;
-        int col = e.getX() / MinerPanel.labelWidth;
+        int row = e.getY() / IMinerView.cellSize;
+        int col = e.getX() / IMinerView.cellSize;
 
         //System.out.println(row + ", " + col);
 
@@ -79,6 +34,63 @@ public class SwingMinerController extends MinerController implements MouseListen
             super.RightMouseClick(row, col);
         }
     }
+
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() instanceof JMenuItem) {
+            JMenuItem srcMI = (JMenuItem) e.getSource();
+            processMenuClick(srcMI);
+        }
+        else if (e.getSource() instanceof  JButton) {
+            JButton srcButton = (JButton) e.getSource();
+            if (srcButton.getActionCommand() == "Restart") {
+                super.startNewGame();
+            }
+        }
+    }
+
+    private void processMenuClick(JMenuItem mi) {
+
+        switch (mi.getActionCommand()) {
+            case "Settings":
+                processSettingsMenu();
+                break;
+            case "newGame":
+                super.startNewGame();
+                break;
+            case "Exit":
+                System.exit(0);
+                break;
+        }
+    }
+
+    private void processSettingsMenu() {
+            if (settings == null)
+                settings = new SettingsDialog((JFrame) view );
+
+            settings.setVisible(true);
+            if(settings.isUserConfirmed()) {
+                startNewGame();
+            }
+    }
+
+
+    protected int[] getGameSettings() {
+        if (settings == null ) {
+            return new int[] {IGameSettings.BEGINNER_MINEFIELD_HEIGHT, IGameSettings.BEGINNER_MINEFIELD_WIDTH,
+                    IGameSettings.BEGINNER_NUM_OF_BOMBS};
+        }
+        else {
+            return new int[] {settings.getFieldHeight(),
+                    settings.getFieldWidth(), settings.getBombsNumber()};
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {}
 
     @Override
     public void mouseEntered(MouseEvent e) {}

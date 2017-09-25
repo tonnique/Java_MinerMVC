@@ -1,11 +1,10 @@
-package Console;
+package ru.antony.Controller.Console;
 
-import Controller.MinerController;
-import Model.Cell;
-import Model.CellStatus;
-import Model.MinerModel;
+import ru.antony.Controller.MinerController;
+import ru.antony.Model.Cell;
+import ru.antony.Model.IGameSettings.*;
+import ru.antony.Model.MinerModel;
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -22,7 +21,8 @@ public class ConsoleController extends MinerController {
         model = m;
     }
 
-    public void startGame() {
+    @Override
+    public void startNewGame() {
 
         Scanner in = new Scanner(System.in);
 
@@ -67,7 +67,7 @@ public class ConsoleController extends MinerController {
 
         while(!model.isGameOver()) {
 
-            System.out.println("Пожалуйста укажите координаты ячейки (x, y). Для отмены нажмите Q");
+            System.out.println("Пожалуйста, укажите координаты ячейки (x, y). Для отмены нажмите Q");
             int row = 0;
             int col = 0;
 
@@ -118,10 +118,10 @@ public class ConsoleController extends MinerController {
     public void RightMouseClick(int row, int col) {
         Cell cell = model.getCell(row, col);
 
-        if (cell.getStatus() == CellStatus.Opened || model.isGameOver()) view.updateView();
+        if (cell.getStatus() == CellStatus.Opened || model.isGameOver()) view.updateMineField();
         else {
-            model.nextCellMark(row, col);
-            view.updateView();
+            model.nextCellMark(cell);
+            view.updateMineField();
 
             if (model.isWin())
                 view.showWinMessage();

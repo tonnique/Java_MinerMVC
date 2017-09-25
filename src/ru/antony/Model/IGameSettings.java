@@ -1,13 +1,19 @@
-package Model;
+package ru.antony.Model;
 
 /**
  * Created by Antony on 23.09.2016.
  */
 public interface IGameSettings {
 
-    public enum GameLevels {
+    // levels for the game
+    enum GameLevels {
         Beginner, Medium, Expert, Custom
     };
+
+    // States of the cell
+    enum CellStatus {
+        Opened, Closed, Flagged, Questioned
+    }
 
     int MIN_FIELD_HEIGHT = 2;
     int MIN_FIELD_WIDTH = 2;
@@ -34,6 +40,5 @@ public interface IGameSettings {
     int CUSTOM_MINEFIELD_HEIGHT = 20;
     int CUSTOM_MINEFIELD_WIDTH = 30;
     int CUSTOM_NUM_OF_BOMBS = 145;
-
 
 }

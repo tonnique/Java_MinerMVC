@@ -1,10 +1,9 @@
-package Controller;
+package ru.antony.Controller;
 
-import Model.Cell;
-import Model.CellStatus;
-import Model.MinerModel;
-import View.IMinerView;
-
+import ru.antony.Model.Cell;
+import ru.antony.Model.IGameSettings.*;
+import ru.antony.Model.MinerModel;
+import ru.antony.View.IMinerView;
 
 /**
  * Created by Antony on 22.09.2016.
@@ -12,7 +11,7 @@ import View.IMinerView;
 public abstract class MinerController {
 
     protected IMinerView view;
-    private MinerModel model;
+    protected MinerModel model;
 
     public MinerController(MinerModel m) {
         this.model = m;
@@ -22,23 +21,21 @@ public abstract class MinerController {
         this.view = v;
     }
 
-
     public void startNewGame() {
         int[] gameSettings = getGameSettings();
-
+        //System.out.println(gameSettings[0] + ", " + gameSettings[1] + ", " + gameSettings[2]);
         model.startNewGame(gameSettings[0], gameSettings[1], gameSettings[2]);
 
-        //view.createBoard(model);
-        view.createBoard();
+        view.addNewMineField();
     }
 
     /**
      * Method returns an array with Settings of the Game
-     * @return an array of int which has length = 3,
+     * @return an array of int with length of 3,
      * this array is representing game settings
-     * index 0 - is mine field height
-     * index 1 - is mine field width
-     * index 2 - is mines amount
+     * index 0 - is minefield height
+     * index 1 - is minefield width
+     * index 2 - is amount of mines
      */
     protected abstract int[] getGameSettings();
 
@@ -49,8 +46,8 @@ public abstract class MinerController {
             model.isGameOver() )
             return;
         else {
-            model.openCell(row, col);
-            view.updateView();
+            model.openCell(cell);
+            view.updateMineField();
             if (model.isWin()) {
                 view.showWinMessage();
             } else if (model.isGameOver()) {
@@ -64,8 +61,8 @@ public abstract class MinerController {
 
         if (cell.getStatus() == CellStatus.Opened || model.isGameOver()) return;
         else {
-            model.nextCellMark(row, col);
-            view.updateView();
+            model.nextCellMark(cell);
+            view.updateMineField();
 
             if (model.isWin())
                 view.showWinMessage();
