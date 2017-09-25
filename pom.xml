@@ -19,7 +19,7 @@
             <configuration>
                 <archive>
                     <manifest>
-                        <mainClass>Launcher</mainClass>
+                        <mainClass>ru.Antony.Launcher</mainClass>
                     </manifest>
                 </archive>
             </configuration>

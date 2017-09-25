@@ -1,65 +1,55 @@
-package View;
+package ru.antony.View;
 
-
-import Model.Cell;
-import Model.MinerModel;
+import ru.antony.Model.Cell;
+import ru.antony.Model.MinerModel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.MouseListener;
+
+import static ru.antony.View.IMinerView.COLOR_UNCHECKED;
 
 
-
-public class MinerPanel extends JPanel {
+public class MineField extends JPanel {
 
     private JLabel[][] cells;
 
-    public static final int labelHeight = 25;
-    public static final int labelWidth = 25;
-
-    private final Color COLOR_UNCKECKED = new Color(181, 230, 29);
-    private final Color COLOR_OPENED = new Color(231, 235, 165);
-    private final Color COLOR_MINED = new Color(255, 0, 0);
-
-    private final Color COLOR1 = Color.BLUE;
-    private final Color COLOR2 = new Color(0, 100, 0);
-    private final Color COLOR3 = Color.RED;
-    private final Color COLOR4 = new Color(0, 0, 150);
-    private final Color COLOR5 = new Color(170, 0, 20);
-    private final Color COLOR6 = new Color(0, 150, 170);
-    private final Color COLOR7 = Color.BLACK;
-    private final Color COLOR8 = Color.GRAY;
-
-
-    private int height; // the height of the minefield (a model)
-    private int width; // the width of the minefield (a model)
+    private int height; // the height of the minefield (value gets from a model)
+    private int width; // the width of the minefield (value gets from a model)
     private MinerModel model;
+    // внутренняя панель, на которой создается игровое поле
+    private JPanel mineFieldPanel = new JPanel();
 
-    public MinerPanel(MinerModel model) {
+    public MineField(MinerModel model) {
         this.model = model;
         height = model.getHeight();
         width = model.getWidth();
         cells = new JLabel[height][width];
 
-        this.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        mineFieldPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
         createField(height, width);
-        setPreferredSize(new Dimension(width * labelWidth, height * labelHeight));
+        mineFieldPanel.setPreferredSize(new Dimension(width * IMinerView.cellSize, height * IMinerView.cellSize));
+        this.setBorder(new EmptyBorder(3,3,3,3));
     }
 
     private void createField(int h, int w) {
         for (int x = 0; x < h; x++) {
             for (int y = 0; y < w; y++) {
                 cells[x][y] = new JLabel();
-                cells[x][y].setBorder(new LineBorder(Color.BLACK));
-                //cells[x][y].setBorder(new EtchedBorder());
+                //cells[x][y].setBorder(new LineBorder(Color.DARK_GRAY));
+                cells[x][y].setBorder(BorderFactory.createEtchedBorder(COLOR_UNCHECKED, Color.DARK_GRAY));
                 cells[x][y].setHorizontalAlignment(SwingConstants.CENTER);
                 cells[x][y].setOpaque(true);
-                cells[x][y].setBackground(COLOR_UNCKECKED);
-                cells[x][y].setPreferredSize(new Dimension(labelWidth, labelHeight));
-                add(cells[x][y]);
+                cells[x][y].setBackground(COLOR_UNCHECKED);
+                cells[x][y].setPreferredSize(new Dimension(IMinerView.cellSize, IMinerView.cellSize));
+                mineFieldPanel.add(cells[x][y]);
             }
         }
+        this.add(mineFieldPanel);
     }
 
     public void syncWithModel() {
@@ -74,14 +64,18 @@ public class MinerPanel extends JPanel {
                         cells[row][col].setText(" ");
                         break;
                     case Flagged:
-                        cells[row][col].setText("F");
+                        if (model.isGameOver() && !cell.hasBomb()) {
+                            cells[row][col].setText("X");
+                        } else {
+                            cells[row][col].setText("F");
+                        }
                         break;
                     case Questioned:
                         cells[row][col].setText("?");
                         break;
                     case Opened:
                         if (!cell.hasBomb()) {
-                            cells[row][col].setBackground(COLOR_OPENED);
+                            cells[row][col].setBackground(IMinerView.colors[0]);
 
                             int cellValue = cell.getValue();
                             String lblText = cellValue + "";
@@ -90,35 +84,35 @@ public class MinerPanel extends JPanel {
                                     lblText = "";
                                     break;
                                 case 1:
-                                    cells[row][col].setForeground(COLOR1);
+                                    cells[row][col].setForeground(IMinerView.colors[1]);
                                     break;
                                 case 2:
-                                    cells[row][col].setForeground(COLOR2);
+                                    cells[row][col].setForeground(IMinerView.colors[2]);
                                     break;
                                 case 3:
-                                    cells[row][col].setForeground(COLOR3);
+                                    cells[row][col].setForeground(IMinerView.colors[3]);
                                     break;
                                 case 4:
-                                    cells[row][col].setForeground(COLOR4);
+                                    cells[row][col].setForeground(IMinerView.colors[4]);
                                     break;
                                 case 5:
-                                    cells[row][col].setForeground(COLOR5);
+                                    cells[row][col].setForeground(IMinerView.colors[5]);
                                     break;
                                 case 6:
-                                    cells[row][col].setForeground(COLOR6);
+                                    cells[row][col].setForeground(IMinerView.colors[6]);
                                     break;
                                 case 7:
-                                    cells[row][col].setForeground(COLOR7);
+                                    cells[row][col].setForeground(IMinerView.colors[7]);
                                     break;
                                 case 8:
-                                    cells[row][col].setForeground(COLOR8);
+                                    cells[row][col].setForeground(IMinerView.colors[8]);
                                     break;
                             }
 
                             cells[row][col].setText(lblText);
                         }
                         else {
-                            cells[row][col].setBackground(COLOR_MINED);
+                            cells[row][col].setBackground(IMinerView.COLOR_MINED);
                         }
                         break;
                     default:
@@ -128,6 +122,11 @@ public class MinerPanel extends JPanel {
             }
         }
 
+    }
+
+    @Override
+    public void addMouseListener(MouseListener listener) {
+        mineFieldPanel.addMouseListener(listener);
     }
 
 }

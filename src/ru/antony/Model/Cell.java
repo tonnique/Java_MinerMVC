@@ -1,6 +1,6 @@
-package Model;
+package ru.antony.Model;
 
-
+import ru.antony.Model.IGameSettings.*;
 
 public class Cell {
 
@@ -18,9 +18,7 @@ public class Cell {
         value = 0;
     }
 
-
     public void setBomb(boolean b) {
-        //this.value = (bomb == true) ? ICell.bombValue : 0;
         hasBomb = b;
     }
 

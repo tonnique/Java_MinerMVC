@@ -1,9 +1,11 @@
-import Controller.*;
-import Model.*;
-import View.*;
+package ru.antony;
 
 import javax.swing.*;
 import java.awt.*;
+
+import ru.antony.Controller.*;
+import ru.antony.Model.*;
+import ru.antony.View.*;
 
 /**
  * Created by Antony on 07.09.2016.
@@ -15,11 +17,11 @@ public class Launcher {
 
             public void run() {
                 MinerModel model = new MinerModel();
-                SwingMinerController controller = new SwingMinerController(model);
+                //SwingMinerController controller = new SwingMinerController(model);
+                MinerController controller = new SwingMinerController(model);
 
                 MinerFrame frame = new MinerFrame(model, controller);
 
-                //SettingsDialog frame = new SettingsDialog(null);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setVisible(true);
             }

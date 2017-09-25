@@ -1,7 +1,9 @@
-package Model;
+package ru.antony.Model;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import ru.antony.Model.IGameSettings.*;
 
 /**
  * Created by Antony on 21.09.2016.
@@ -10,21 +12,21 @@ public class MinerModel {
 
     private Cell[][] cells;
 
-    private boolean firstStep; // был произведен первый ход
+    private boolean firstStep; // был произведен первый ход?
 
     private boolean gameOver;
 
     private int field_height;
     private int field_width;
     private int bomb_amount;
+    private int flags_amount;
 
-    /** Конструктор по умолчанию. Здесь создается минное поле для начинающего игрока (Beginner)
-     * и включен режим безопасного первого хода */
+    /** Конструктор по умолчанию. Здесь создается минное поле по умолчанию для начинающего игрока (Beginner) */
     public MinerModel() {
-
         this.field_height = IGameSettings.BEGINNER_MINEFIELD_HEIGHT;
         this.field_width = IGameSettings.BEGINNER_MINEFIELD_WIDTH;
-        this.bomb_amount = 10;
+        this.bomb_amount = IGameSettings.BEGINNER_NUM_OF_BOMBS;
+        flags_amount = bomb_amount;
     }
 
     /**
@@ -47,6 +49,7 @@ public class MinerModel {
         }
     }
 
+    // checking correct values and sets them
     private void setGameValues(int h, int w, int b) {
         if (h >= IGameSettings.MIN_FIELD_HEIGHT && h <= IGameSettings.MAX_FIELD_HEIGHT){
             this.field_height = h;
@@ -63,14 +66,15 @@ public class MinerModel {
         }
 
 
-        if ((field_height * field_width * IGameSettings.MAX_BOMB_RATIO
-                > field_height * field_width / b))
+        if ((field_height * field_width * IGameSettings.MAX_BOMB_RATIO > b))
         {
             this.bomb_amount = b;
         }
         else {
             this.bomb_amount = (int)(field_height * field_width * IGameSettings.MAX_BOMB_RATIO);
         }
+
+        flags_amount = bomb_amount;
     }
 
     // Возвращает ячейку в массиве с указанными индексами
@@ -83,40 +87,30 @@ public class MinerModel {
         }
     }
 
-
     /**
      * В этом методе минное поле заполняется минами.
-     * Я решил вызывать этом метод не сразу из конструктора MinerModel,
-     * а где-нибудь после выбора ячейки пользователем, т.к. я хочу
-     * сделать возможность, по выбору, не заполянять миной первую ячейку,
-     * которую выбирает пользователь, , следовательно - пользователь
-     * не будет проигрывать с 1го хода.
-     *
-     * @param bombNumber - количество мин в поле
+     * Я решил вызывать этот метод не сразу из конструктора,
+     * а после выбора ячейки пользователем, т.к. я хочу дать возможность,
+     * пользователю не проигрывать с 1го хода.
      */
-    public void setMines(int bombNumber) {
+    public void setMines() {
 
         Random rand = new Random();
 
-        do {
+        while(bomb_amount > 0) {
             int row = rand.nextInt(field_height);
             int col =  rand.nextInt(field_width);
 
             /**
              * Здесь проверяется, что ячейка, которую определил рандом, еще не имеет мины
              * А так же проверяется, что эта ячейка не первая кот. открывает пользователь
-             * (можно будет включить такой режим)
              */
             if (!cells[row][col].hasBomb() && (cells[row][col].getStatus() != CellStatus.Opened)) {
                 cells[row][col].setBomb(true);
 
-                bombNumber--;
+                bomb_amount--;
             }
         }
-        while(bombNumber > 0);
-
-        //displayMines(); // for debugging only
-
     }
 
     /**
@@ -159,27 +153,33 @@ public class MinerModel {
     }
 
     /**
+     * Этот метод возвращает массив соседних ячейкек для текущей ячейки с координатами (row, col)
      * Этот метод вызывается из метода openCell, в случае, если у ячейки не будет рядом мин (она пустая).
-     * Этот метод возвращает соседние ячейки для текущей ячейки с координатами (row, col)
-     * @param row - координата ячейки в массиве по рядам
-     * @param col - координата ячейки в массиве по колонкам
+     * Так же этом метод вызывается в методе countMinesAroundCell(Cell cell) -
+     * для подсчета кол-ва мин рядом с открытой клеткой
+     *
+     * @param cell - ячейка для которой определяются соседние клетки
      * @return - возвращает массив ячеек, которые примыкают к текущей
      */
-    private Cell[] getCellNeighbours(int row, int col) {
+    private Cell[] getCellNeighbours(Cell cell) {
+
+        int row = cell.getRow();
+        int col = cell.getCol();
+
         ArrayList<Cell> neighbours = new ArrayList<>();
-        Cell cell;
+        Cell tmpCell;
         for (int r = row - 1; r <= row+1; r++) {
 
-            cell = getCell(r, col-1);
-            if (cell != null) neighbours.add(cell);
+            tmpCell = getCell(r, col-1);
+            if (tmpCell != null) neighbours.add(tmpCell);
 
             if (r != row) {
-                cell = getCell(r, col);
-                if (cell != null) neighbours.add(cell);
+                tmpCell = getCell(r, col);
+                if (tmpCell != null) neighbours.add(tmpCell);
             }
 
-            cell = getCell(r, col+1 );
-            if (cell != null) neighbours.add(cell);
+            tmpCell = getCell(r, col+1 );
+            if (tmpCell != null) neighbours.add(tmpCell);
         }
 
         Cell[] cells = new Cell[1];
@@ -187,12 +187,12 @@ public class MinerModel {
     }
 
     /**
-     * Этот метод подсчитывает сумму мин вокруг ячейки */
-    private int countMinesAroundCell(int row, int col) {
-        Cell[] neighbours = getCellNeighbours(row, col);
+     * Этот метод подсчитывает кол-во мин вокруг ячейки */
+    private int countMinesAroundCell(Cell cell) {
+        Cell[] neighbours = getCellNeighbours(cell);
         int sum = 0;
-        for (int i = 0; i < neighbours.length; i++) {
-            if (neighbours[i].hasBomb()) {
+        for (Cell c : neighbours) {
+            if (c.hasBomb()) {
                 sum++;
             }
         }
@@ -210,8 +210,12 @@ public class MinerModel {
         }
     }
 
-    public void openCell(int row, int col) {
-        Cell cell = getCell(row, col);
+    /**
+     * Открывает клетку. Если это первая открытая клетка - тогда устанавливаются мины
+     * во всем игровом поле
+     * @param cell - открываемая клетка
+     */
+    public void openCell(Cell cell) {
         if (cell == null) return;
 
         if (cell.getStatus() == CellStatus.Flagged) return;
@@ -227,53 +231,57 @@ public class MinerModel {
         /** минное поле создается только после первого хода */
         if (firstStep == true) {
             firstStep = false;
-            setMines(bomb_amount);
+            setMines();
         }
 
-        int cellValue = countMinesAroundCell(row, col);
+        int cellValue = countMinesAroundCell(cell);
         cell.setValue(cellValue);
 
         if (cellValue == 0) {
-            Cell[] neighbours = getCellNeighbours(row, col);
-            for (Cell n : neighbours) {
-                if (n.getStatus() != CellStatus.Opened && n.getStatus() != CellStatus.Flagged) {
-                    this.openCell(n.getRow(), n.getCol());
+            Cell[] neighbours = getCellNeighbours(cell);
+            for (Cell с : neighbours) {
+                if (с.getStatus() != CellStatus.Opened && с.getStatus() != CellStatus.Flagged) {
+                    this.openCell(с);
                 }
             }
         }
     }
 
-    public void nextCellMark(int row, int col) {
-        Cell cell = getCell(row, col);
+    public void nextCellMark(Cell cell) {
         if (cell != null)
             cell.nextState();
         if (cell.getStatus() == CellStatus.Flagged) {
-            bomb_amount--;
+            flags_amount--;
         }
         else if (cell.getStatus() == CellStatus.Questioned) {
-            bomb_amount++;
+            flags_amount++;
         }
     }
 
-    // Проверка, что пользователь выиграл игру
+    /** Проверка, что пользователь выиграл игру
+     *  The win comes in conditions:
+     *  the user marked all mines with flags - there are no flags left
+     *  and all ordinary (not mined) cells are opened
+     *
+     * @return returns true value if all wining game conditions  are met or false value in opposite case.
+     */
     public boolean isWin() {
 
-        if (bomb_amount != 0) return  false;
+        if (flags_amount != 0) return false;
 
         for (int row = 0; row < this.field_height; row++) {
             for (int col = 0; col < this.field_width; col++) {
                 Cell cell = cells[row][col];
 
                 // Every ordinary (not mined) cells must be opened
-                if (!cell.hasBomb() && (cell.getStatus() != CellStatus.Opened &&
-                                      cell.getStatus() != CellStatus.Flagged)) {
+                if (!cell.hasBomb() && cell.getStatus() != CellStatus.Opened ) {
                     return false;
                 }
             }
         }
 
         gameOver = true; //This not means that the user has failed the game -
-                         // this means exactly - the game is over
+                         // this means exactly - the game is finished
         return true;
     }
 
@@ -283,10 +291,14 @@ public class MinerModel {
 
     public int getWidth() { return field_width; }
 
-    public int getBombsNumber() { return bomb_amount; }
+    /* Этот метод возвращает кол-во флажков.
+       Раньше я хотел, сообщать кол-во мин, но, поскольку при установке флажка,
+       у нас в игровом окне меняется информация о кол-ве мин, - что не является правдой -
+       т.к. у нас кол-во мин остается одним и тем же, а меняются кол-во флажков
+     */
+    public int getBombsNumber() { return flags_amount; }
 
-
-    // this is only for debugging purpouse
+    // this is only for debugging purpose
     private void displayMines() {
 
         boolean yes = false;

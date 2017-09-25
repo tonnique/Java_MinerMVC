@@ -1,48 +1,41 @@
-package Console;
+package ru.antony.View.Console;
 
-import Model.Cell;
-import Model.MinerModel;
-import View.IMinerView;
+import ru.antony.Controller.MinerController;
+import ru.antony.Model.Cell;
+import ru.antony.Model.MinerModel;
+import ru.antony.View.IMinerView;
 
 /**
  * Created by Antony on 29.09.2016.
  */
 public class ConsoleView implements IMinerView {
     MinerModel model;
-    ConsoleController controller;
+    MinerController controller;
 
-    //String[][] cells;
-
-    //int field_height;
-    //int field_width;
-
-
-    public ConsoleView(MinerModel m, ConsoleController c) {
+    public ConsoleView(MinerModel m, MinerController c) {
         model = m;
         controller = c;
         controller.setView(this);
-        controller.startGame();
-
+        controller.startNewGame();
     }
 
-    @Override
-    //public void createBoard(MinerModel m) {
-    public void createBoard() {
-        updateView();
+    //@Override
+    public void addNewMineField() {
+        updateMineField();
     }
 
-    @Override
+    //@Override
     public void showWinMessage() {
         System.out.println("Вы победили!");
     }
 
-    @Override
+    //@Override
     public void showGameOverMessage() {
         System.out.println("Вы проиграли!");
     }
 
-    @Override
-    public void updateView() {
+    //@Override
+    public void updateMineField() {
         System.out.println(model.getBombsNumber() + " Mines lefts");
 
         int field_height = model.getHeight();
