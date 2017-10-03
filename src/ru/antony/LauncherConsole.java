@@ -1,7 +1,8 @@
 package ru.antony;
 
-import ru.antony.Controller.MinerController;
-import ru.antony.Model.MinerModel;
+import ru.antony.Controller.IMinerController;
+import ru.antony.Model.IMinerModel;
+import ru.antony.Model.MinerGameLogic;
 import ru.antony.Controller.Console.ConsoleController;
 import ru.antony.View.Console.ConsoleView;
 
@@ -12,9 +13,8 @@ import ru.antony.View.Console.ConsoleView;
 public class LauncherConsole {
 
     public static void main(String[] args) {
-        MinerModel model = new MinerModel();
-        //ConsoleController controller = new ConsoleController(model);
-        MinerController controller = new ConsoleController(model);
+        IMinerModel model = new MinerGameLogic();
+        IMinerController controller = new ConsoleController(model);
         new ConsoleView(model, controller);
     }
 }

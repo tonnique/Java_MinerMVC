@@ -1,18 +1,17 @@
 package ru.antony.View.Console;
 
-import ru.antony.Controller.MinerController;
-import ru.antony.Model.Cell;
-import ru.antony.Model.MinerModel;
+import ru.antony.Controller.IMinerController;
+import ru.antony.Model.IMinerModel;
 import ru.antony.View.IMinerView;
 
 /**
  * Created by Antony on 29.09.2016.
  */
 public class ConsoleView implements IMinerView {
-    MinerModel model;
-    MinerController controller;
+    IMinerModel model;
+    IMinerController controller;
 
-    public ConsoleView(MinerModel m, MinerController c) {
+    public ConsoleView(IMinerModel m, IMinerController c) {
         model = m;
         controller = c;
         controller.setView(this);
@@ -43,39 +42,41 @@ public class ConsoleView implements IMinerView {
 
         for (int row = 0; row < field_height; row++) {
             for (int col = 0; col < field_width; col++) {
-                Cell cell = model.getCell(row, col);
 
-                switch (cell.getStatus()) {
-                    case Closed :
-                        System.out.print("|x");
-                        break;
-                    case Flagged:
-                        System.out.print("|F");
-                        break;
-                    case Questioned:
-                        System.out.print("|?");
-                        break;
-                    case Opened:
-                        if (!cell.hasBomb()) {
-                            int cellValue = cell.getValue();
-                            if (cellValue == 0) {
-                                System.out.print("| ");
+                try {
+                    switch (model.getCellStatus(row, col)) {
+                        case Closed:
+                            System.out.print("|x");
+                            break;
+                        case Flagged:
+                            System.out.print("|F");
+                            break;
+                        case Questioned:
+                            System.out.print("|?");
+                            break;
+                        case Opened:
+                            if (!model.isCellHasBomb(row, col)) {
+                                int cellValue = model.getCellValue(row, col);
+
+                                if (cellValue == 0) {
+                                    System.out.print("| ");
+                                } else {
+                                    System.out.print("|" + cellValue);
+                                }
+                            } else {
+                                System.out.print("|*");
                             }
-                            else {
-                                System.out.print("|" + cellValue);
-                            }
-                        }
-                        else {
-                            System.out.print("|*");
-                        }
-                        break;
-                    default:
-                        return;
+                            break;
+                        default:
+                            return;
+                    }
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    ex.printStackTrace();
                 }
             }
             System.out.println("|");
         }
         System.out.println();
-
     }
 }

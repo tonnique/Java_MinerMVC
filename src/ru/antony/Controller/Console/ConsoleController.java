@@ -1,9 +1,8 @@
 package ru.antony.Controller.Console;
 
 import ru.antony.Controller.MinerController;
-import ru.antony.Model.Cell;
 import ru.antony.Model.IGameSettings.*;
-import ru.antony.Model.MinerModel;
+import ru.antony.Model.IMinerModel;
 
 import java.util.Scanner;
 
@@ -14,9 +13,9 @@ public class ConsoleController extends MinerController {
 
     String userInput = "";
     boolean work = true;
-    MinerModel model;
+    IMinerModel model;
 
-    public ConsoleController(MinerModel m) {
+    public ConsoleController(IMinerModel m) {
         super(m);
         model = m;
     }
@@ -55,8 +54,9 @@ public class ConsoleController extends MinerController {
 
     // Выводит пользователю доступные комманды
     private void printUserCommands() {
-
-        System.out.println("Чтобы выбрать ячейку нажмите S");
+        if (model != null && !model.isGameOver()) {
+            System.out.println("Чтобы выбрать ячейку нажмите S");
+        }
         System.out.println("Чтобы начать новую игру нажмите N");
         //System.out.println("Вывести эту справку снова нажмите H");
         System.out.println("Для выхода нажмите Q");
@@ -75,12 +75,12 @@ public class ConsoleController extends MinerController {
                 System.out.print("Ряд Y=");
                 userInput = in.nextLine();
                 if(userInput.toUpperCase().equals("Q")) {break;}
-                row = Integer.valueOf(userInput);
+                row = Integer.valueOf(userInput) - 1;
 
                 System.out.print("Колонка X=");
                 userInput = in.nextLine();
                 if(userInput.toUpperCase().equals("Q")) {break;}
-                col = Integer.valueOf(userInput);
+                col = Integer.valueOf(userInput) - 1;
 
             } catch (NumberFormatException ex) {
                 System.out.println("Были указаны не верные данные. Пожалуйста попробуйте снова.");
@@ -89,42 +89,51 @@ public class ConsoleController extends MinerController {
 
             //boolean w = true;
             while (true) {
-                System.out.println("Что вы хотие сделать с выбранной ячейкой {" + row + "," + col + "} ? " +
+                System.out.println("Что вы хотие сделать с выбранной ячейкой {" + (row + 1) + "," + (col + 1) + "} ? " +
                         "Открыть {O} или отметить {R}. Дня отмены нажмите С");
                 userInput = in.nextLine();
 
-                if (userInput.toUpperCase().equals("C")) {
-                    //w = false;
-                    break;
-                } else if (userInput.toUpperCase().equals("O")) {
-                    //w = false;
-                    super.LeftMouseClick(row, col);
-                    break;
-                } else if (userInput.toUpperCase().equals("R")) {
-                    //w = false;
-                    super.RightMouseClick(row, col);
-                    break;
+                try {
+                    if (userInput.toUpperCase().equals("C")) {
+                        //w = false;
+                        break;
+                    } else if (userInput.toUpperCase().equals("O")) {
+                        //w = false;
+                        super.LeftMouseClick(row, col);
+                        break;
+                    } else if (userInput.toUpperCase().equals("R")) {
+                        //w = false;
+                        super.RightMouseClick(row, col);
+                        break;
+                    }
+                } catch (IllegalArgumentException ex) {
+                    System.out.println(ex.getMessage());
+                    //ex.printStackTrace();
                 }
             }
         }
     }
 
     @Override
-    protected int[] getGameSettings() {
+    public int[] getGameSettings() {
         return  new int[] {10, 10, 10};
     };
 
     @Override
-    public void RightMouseClick(int row, int col) {
-        Cell cell = model.getCell(row, col);
+    public void RightMouseClick(int row, int col) throws IllegalArgumentException {
+        try {
+            CellStatus cellStatus = model.getCellStatus(row, col);
 
-        if (cell.getStatus() == CellStatus.Opened || model.isGameOver()) view.updateMineField();
-        else {
-            model.nextCellMark(cell);
-            view.updateMineField();
+            if (cellStatus == CellStatus.Opened || model.isGameOver()) view.updateMineField();
+            else {
+                model.nextCellMark(row, col);
+                view.updateMineField();
 
-            if (model.isWin())
-                view.showWinMessage();
+                if (model.isWin())
+                    view.showWinMessage();
+            }
+        } catch (IllegalArgumentException ex) {
+            throw ex;
         }
     }
 }

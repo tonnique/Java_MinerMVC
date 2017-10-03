@@ -1,8 +1,8 @@
 package ru.antony.View;
 
-import ru.antony.Controller.MinerController;
+import ru.antony.Controller.IMinerController;
 import ru.antony.Controller.SwingMinerController;
-import ru.antony.Model.MinerModel;
+import ru.antony.Model.IMinerModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,14 +14,13 @@ import java.awt.*;
  */
 public class MinerFrame extends JFrame implements IMinerView {
 
-    //private SwingMinerController controller;
-    private MinerController controller;
-    private MinerModel model;
+    private IMinerController controller;
+    private IMinerModel model;
 
     private JLabel lblStatus = new JLabel();
     private MineField mineField;
 
-    public MinerFrame(MinerModel model, MinerController controller){
+    public MinerFrame(IMinerModel model, IMinerController controller){
 
         super("Miner");
 
@@ -118,5 +117,4 @@ public class MinerFrame extends JFrame implements IMinerView {
         lblStatus.setText(model.getBombsNumber() + " Mines");
         mineField.syncWithModel();
     }
-
 }
