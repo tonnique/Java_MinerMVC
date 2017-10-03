@@ -2,7 +2,7 @@ package ru.antony.Model;
 
 import ru.antony.Model.IGameSettings.*;
 
-public class Cell {
+ class Cell implements IMinerCell{
 
     private int row;
     private int col;
@@ -32,7 +32,7 @@ public class Cell {
     public int getValue() { return value; }
 
     // Метод при нажатии правой кнопки мыши устанавливает "следующее" состояние
-    public void nextState() {
+    public void setNextState() {
         String[] statArray =  {"Closed","Flagged","Questioned"};
 
         int id = 0;
@@ -41,7 +41,6 @@ public class Cell {
                 id = i; break;
             }
         }
-
         status = CellStatus.valueOf(statArray[(id + 1) % statArray.length]);
     }
 

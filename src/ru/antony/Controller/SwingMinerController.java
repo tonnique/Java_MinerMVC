@@ -1,7 +1,7 @@
 package ru.antony.Controller;
 
 import ru.antony.Model.IGameSettings;
-import ru.antony.Model.MinerModel;
+import ru.antony.Model.IMinerModel;
 import ru.antony.View.IMinerView;
 import ru.antony.View.SettingsDialog;
 
@@ -18,7 +18,7 @@ public class SwingMinerController extends MinerController implements MouseListen
 
     SettingsDialog settings;
 
-    public SwingMinerController(MinerModel m) {super(m); }
+    public SwingMinerController(IMinerModel m) {super(m); }
 
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -27,11 +27,16 @@ public class SwingMinerController extends MinerController implements MouseListen
 
         //System.out.println(row + ", " + col);
 
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            super.LeftMouseClick(row, col);
-        }
-        if (e.getButton() == MouseEvent.BUTTON3) {
-            super.RightMouseClick(row, col);
+        try {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                super.LeftMouseClick(row, col);
+            }
+            else if (e.getButton() == MouseEvent.BUTTON3) {
+                super.RightMouseClick(row, col);
+            }
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
 
@@ -75,7 +80,7 @@ public class SwingMinerController extends MinerController implements MouseListen
     }
 
 
-    protected int[] getGameSettings() {
+    public int[] getGameSettings() {
         if (settings == null ) {
             return new int[] {IGameSettings.BEGINNER_MINEFIELD_HEIGHT, IGameSettings.BEGINNER_MINEFIELD_WIDTH,
                     IGameSettings.BEGINNER_NUM_OF_BOMBS};

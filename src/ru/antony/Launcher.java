@@ -16,10 +16,8 @@ public class Launcher {
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                MinerModel model = new MinerModel();
-                //SwingMinerController controller = new SwingMinerController(model);
-                MinerController controller = new SwingMinerController(model);
-
+                IMinerModel model = new MinerGameLogic();
+                IMinerController controller = new SwingMinerController(model);
                 MinerFrame frame = new MinerFrame(model, controller);
 
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

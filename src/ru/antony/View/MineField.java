@@ -1,12 +1,9 @@
 package ru.antony.View;
 
-import ru.antony.Model.Cell;
-import ru.antony.Model.MinerModel;
+import ru.antony.Model.IMinerModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseListener;
 
@@ -19,11 +16,11 @@ public class MineField extends JPanel {
 
     private int height; // the height of the minefield (value gets from a model)
     private int width; // the width of the minefield (value gets from a model)
-    private MinerModel model;
+    private IMinerModel model;
     // внутренняя панель, на которой создается игровое поле
     private JPanel mineFieldPanel = new JPanel();
 
-    public MineField(MinerModel model) {
+    public MineField(IMinerModel model) {
         this.model = model;
         height = model.getHeight();
         width = model.getWidth();
@@ -56,72 +53,73 @@ public class MineField extends JPanel {
 
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
+                //Cell cell = model.getCell(row, col);
 
-                Cell cell = model.getCell(row, col);
-
-                switch (cell.getStatus()) {
-                    case Closed :
-                        cells[row][col].setText(" ");
-                        break;
-                    case Flagged:
-                        if (model.isGameOver() && !cell.hasBomb()) {
-                            cells[row][col].setText("X");
-                        } else {
-                            cells[row][col].setText("F");
-                        }
-                        break;
-                    case Questioned:
-                        cells[row][col].setText("?");
-                        break;
-                    case Opened:
-                        if (!cell.hasBomb()) {
-                            cells[row][col].setBackground(IMinerView.colors[0]);
-
-                            int cellValue = cell.getValue();
-                            String lblText = cellValue + "";
-                            switch (cellValue) {
-                                case 0:
-                                    lblText = "";
-                                    break;
-                                case 1:
-                                    cells[row][col].setForeground(IMinerView.colors[1]);
-                                    break;
-                                case 2:
-                                    cells[row][col].setForeground(IMinerView.colors[2]);
-                                    break;
-                                case 3:
-                                    cells[row][col].setForeground(IMinerView.colors[3]);
-                                    break;
-                                case 4:
-                                    cells[row][col].setForeground(IMinerView.colors[4]);
-                                    break;
-                                case 5:
-                                    cells[row][col].setForeground(IMinerView.colors[5]);
-                                    break;
-                                case 6:
-                                    cells[row][col].setForeground(IMinerView.colors[6]);
-                                    break;
-                                case 7:
-                                    cells[row][col].setForeground(IMinerView.colors[7]);
-                                    break;
-                                case 8:
-                                    cells[row][col].setForeground(IMinerView.colors[8]);
-                                    break;
+                try {
+                    switch (model.getCellStatus(row, col)) {
+                        case Closed :
+                            cells[row][col].setText(" ");
+                            break;
+                        case Flagged:
+                            if (model.isGameOver() && !model.isCellHasBomb(row, col)) {
+                                cells[row][col].setText("X");
+                            } else {
+                                cells[row][col].setText("F");
                             }
+                            break;
+                        case Questioned:
+                            cells[row][col].setText("?");
+                            break;
+                        case Opened:
+                            if (!model.isCellHasBomb(row, col)) {
+                                cells[row][col].setBackground(IMinerView.colors[0]);
 
-                            cells[row][col].setText(lblText);
-                        }
-                        else {
-                            cells[row][col].setBackground(IMinerView.COLOR_MINED);
-                        }
-                        break;
-                    default:
-                        return;
+                                int cellValue = model.getCellValue(row, col);
+                                String lblText = cellValue + "";
+                                switch (cellValue) {
+                                    case 0:
+                                        lblText = "";
+                                        break;
+                                    case 1:
+                                        cells[row][col].setForeground(IMinerView.colors[1]);
+                                        break;
+                                    case 2:
+                                        cells[row][col].setForeground(IMinerView.colors[2]);
+                                        break;
+                                    case 3:
+                                        cells[row][col].setForeground(IMinerView.colors[3]);
+                                        break;
+                                    case 4:
+                                        cells[row][col].setForeground(IMinerView.colors[4]);
+                                        break;
+                                    case 5:
+                                        cells[row][col].setForeground(IMinerView.colors[5]);
+                                        break;
+                                    case 6:
+                                        cells[row][col].setForeground(IMinerView.colors[6]);
+                                        break;
+                                    case 7:
+                                        cells[row][col].setForeground(IMinerView.colors[7]);
+                                        break;
+                                    case 8:
+                                        cells[row][col].setForeground(IMinerView.colors[8]);
+                                        break;
+                                }
+                                cells[row][col].setText(lblText);
+                            }
+                            else {
+                                cells[row][col].setBackground(IMinerView.COLOR_MINED);
+                            }
+                            break;
+                        default:
+                            return;
+                    }
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
                 }
                 repaint();
             }
         }
-
     }
 
     @Override
