@@ -13,7 +13,9 @@ public class MinerGameLogic implements IMinerModel {
     private IMinerCell[][] cells;
 
     private boolean firstStep; // был произведен первый ход?
-    private boolean gameOver;
+    //private boolean gameOver;
+
+    IGameSettings.GameState stateOfGame;
 
     private int field_height;
     private int field_width;
@@ -26,7 +28,8 @@ public class MinerGameLogic implements IMinerModel {
         this.field_width = IGameSettings.BEGINNER_MINEFIELD_WIDTH;
         this.bomb_amount = IGameSettings.BEGINNER_NUM_OF_BOMBS;
         flags_amount = bomb_amount;
-        gameOver = true;
+        stateOfGame = GameState.LOOSE;
+        //gameOver = true;
     }
 
     /**
@@ -36,14 +39,15 @@ public class MinerGameLogic implements IMinerModel {
     public void startNewGame(int height, int width, int b ) {
 
         firstStep = true;
-        gameOver = false;
+        //gameOver = false;
+        stateOfGame = GameState.RUNNING;
 
         setGameValues(height, width, b);
 
         cells = new IMinerCell[field_height][field_width];
 
-        for (int row = 0; row < height; row++) {
-            for (int col = 0; col < width; col++) {
+        for (int row = 0; row < field_height; row++) {
+            for (int col = 0; col < field_width; col++) {
                 cells[row][col] = new Cell(row, col);
             }
         }
@@ -55,14 +59,18 @@ public class MinerGameLogic implements IMinerModel {
             this.field_height = h;
         }
         else {
-            this.field_height = (this.field_height == 0) ? 10 : field_height ;
+            this.field_height = (this.field_height == 0) ? 10 : field_height;
+            if (h > IGameSettings.MAX_FIELD_HEIGHT)
+                this.field_height = IGameSettings.MAX_FIELD_HEIGHT;
         }
 
         if (w >= IGameSettings.MIN_FIELD_WIDTH && w <= IGameSettings.MAX_FIELD_WIDTH) {
             this.field_width = w;
         }
         else {
-            this.field_height = (this.field_width == 0) ? 10 : field_width;
+            this.field_width = (this.field_width == 0) ? 10 : field_width;
+            if (w > IGameSettings.MAX_FIELD_WIDTH)
+                this.field_width = IGameSettings.MAX_FIELD_WIDTH;
         }
 
 
@@ -123,13 +131,15 @@ public class MinerGameLogic implements IMinerModel {
      * @param cell - ячейка для которой определяются соседние клетки
      * @return - возвращает массив ячеек, которые примыкают к текущей
      */
-    private IMinerCell[] getCellNeighbours(IMinerCell cell) {
+    //private IMinerCell[] getCellNeighbours(IMinerCell cell) {
+    private ArrayList<IMinerCell> getCellNeighbours(IMinerCell cell) {
+
+        ArrayList<IMinerCell> neighbours = new ArrayList<>();
+        IMinerCell tmpCell;
 
         int row = cell.getRow();
         int col = cell.getCol();
 
-        ArrayList<IMinerCell> neighbours = new ArrayList<>();
-        IMinerCell tmpCell;
         for (int r = row - 1; r <= row+1; r++) {
 
             tmpCell = getCell(r, col-1);
@@ -144,14 +154,16 @@ public class MinerGameLogic implements IMinerModel {
             if (tmpCell != null) neighbours.add(tmpCell);
         }
 
-        IMinerCell[] cells = new IMinerCell[1];
-        return neighbours.toArray(cells);
+        //IMinerCell[] cells = new IMinerCell[1];
+        //return neighbours.toArray(cells);
+        return neighbours;
     }
 
     /**
      * Этот метод подсчитывает кол-во мин вокруг ячейки */
     private int countMinesAroundCell(IMinerCell cell) {
-        IMinerCell[] neighbours = getCellNeighbours(cell);
+        //IMinerCell[] neighbours = getCellNeighbours(cell);
+        ArrayList<IMinerCell> neighbours = getCellNeighbours(cell);
         int sum = 0;
         for (IMinerCell c : neighbours) {
             if (c.hasBomb()) {
@@ -198,7 +210,8 @@ public class MinerGameLogic implements IMinerModel {
 
         if (cell.hasBomb()) {
             openAllMines();
-            gameOver = true;
+            //gameOver = true;
+            stateOfGame = GameState.LOOSE;
             return;
         }
 
@@ -212,13 +225,31 @@ public class MinerGameLogic implements IMinerModel {
         cell.setValue(cellValue);
 
         if (cellValue == 0) {
+            ArrayList<IMinerCell> neighbours = getCellNeighbours(cell);
+            for (int i = 0; i < neighbours.size(); i++) {
+                cell = neighbours.get(i);
+
+                cellValue = countMinesAroundCell(cell);
+                cell.setValue(cellValue);
+
+                if (cellValue == 0 && cell.getStatus() != CellStatus.Opened &&
+                        cell.getStatus() != CellStatus.Flagged) {
+                    neighbours.addAll(getCellNeighbours(cell));
+                }
+                cell.open();
+            }
+        }
+
+        /** I decided to avoid recursion
+         *
+        if (cellValue == 0) {
             IMinerCell[] neighbours = getCellNeighbours(cell);
             for (IMinerCell с : neighbours) {
                 if (с.getStatus() != CellStatus.Opened && с.getStatus() != CellStatus.Flagged) {
                     this.openCell(с);
                 }
             }
-        }
+        }*/
     }
 
     public void nextCellMark(int row, int col) {
@@ -271,7 +302,7 @@ public class MinerGameLogic implements IMinerModel {
      *
      * @return returns true value if all wining game conditions  are met or false value in opposite case.
      */
-    public boolean isWin() {
+    private boolean isWin() {
 
         if (flags_amount != 0) return false;
 
@@ -286,12 +317,17 @@ public class MinerGameLogic implements IMinerModel {
             }
         }
 
-        gameOver = true; //This not means that the user has failed the game -
+        //gameOver = true; //This not means that the user has failed the game -
                          // this means exactly - the game is finished
         return true;
     }
 
-    public boolean isGameOver() { return gameOver; }
+    //public boolean isGameOver() { return gameOver; }
+
+    public GameState checkGameStatus() {
+        if (isWin()) stateOfGame = GameState.WIN;
+        return stateOfGame;
+    }
 
     public int getHeight() { return field_height; }
 

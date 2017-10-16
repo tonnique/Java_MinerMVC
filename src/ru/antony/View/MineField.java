@@ -1,5 +1,6 @@
 package ru.antony.View;
 
+import ru.antony.Model.IGameSettings;
 import ru.antony.Model.IMinerModel;
 
 import javax.swing.*;
@@ -61,7 +62,8 @@ public class MineField extends JPanel {
                             cells[row][col].setText(" ");
                             break;
                         case Flagged:
-                            if (model.isGameOver() && !model.isCellHasBomb(row, col)) {
+                            //if (model.isGameOver() && !model.isCellHasBomb(row, col)) {
+                            if (model.checkGameStatus() == IGameSettings.GameState.LOOSE && !model.isCellHasBomb(row, col)) {
                                 cells[row][col].setText("X");
                             } else {
                                 cells[row][col].setText("F");

@@ -54,7 +54,8 @@ public class ConsoleController extends MinerController {
 
     // Выводит пользователю доступные комманды
     private void printUserCommands() {
-        if (model != null && !model.isGameOver()) {
+        //if (model != null && !model.isGameOver()) {
+        if (model != null && model.checkGameStatus() == GameState.RUNNING) {
             System.out.println("Чтобы выбрать ячейку нажмите S");
         }
         System.out.println("Чтобы начать новую игру нажмите N");
@@ -65,7 +66,8 @@ public class ConsoleController extends MinerController {
     private void selectCell() {
         Scanner in = new Scanner(System.in);
 
-        while(!model.isGameOver()) {
+        //while(!model.isGameOver()) {
+        while(model.checkGameStatus() == GameState.RUNNING) {
 
             System.out.println("Пожалуйста, укажите координаты ячейки (x, y). Для отмены нажмите Q");
             int row = 0;
@@ -90,7 +92,7 @@ public class ConsoleController extends MinerController {
             //boolean w = true;
             while (true) {
                 System.out.println("Что вы хотие сделать с выбранной ячейкой {" + (row + 1) + "," + (col + 1) + "} ? " +
-                        "Открыть {O} или отметить {R}. Дня отмены нажмите С");
+                        "Открыть {O} или отметить {F}. Дня отмены нажмите С");
                 userInput = in.nextLine();
 
                 try {
@@ -101,7 +103,7 @@ public class ConsoleController extends MinerController {
                         //w = false;
                         super.LeftMouseClick(row, col);
                         break;
-                    } else if (userInput.toUpperCase().equals("R")) {
+                    } else if (userInput.toUpperCase().equals("F")) {
                         //w = false;
                         super.RightMouseClick(row, col);
                         break;
@@ -124,12 +126,14 @@ public class ConsoleController extends MinerController {
         try {
             CellStatus cellStatus = model.getCellStatus(row, col);
 
-            if (cellStatus == CellStatus.Opened || model.isGameOver()) view.updateMineField();
+            //if (cellStatus == CellStatus.Opened || model.isGameOver()) view.updateMineField();
+            if (cellStatus == CellStatus.Opened || model.checkGameStatus() != GameState.RUNNING) view.updateMineField();
             else {
                 model.nextCellMark(row, col);
                 view.updateMineField();
 
-                if (model.isWin())
+                //if (model.isWin())
+                if (model.checkGameStatus() == GameState.WIN)
                     view.showWinMessage();
             }
         } catch (IllegalArgumentException ex) {

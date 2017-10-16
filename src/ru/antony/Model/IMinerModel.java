@@ -14,9 +14,7 @@ public interface IMinerModel {
 
     void nextCellMark(int row, int col);
 
-    boolean isGameOver();
-
-    boolean isWin();
+    IGameSettings.GameState checkGameStatus();
 
     int getBombsNumber();
 
