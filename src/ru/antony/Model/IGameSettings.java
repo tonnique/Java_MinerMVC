@@ -15,11 +15,13 @@ public interface IGameSettings {
         Opened, Closed, Flagged, Questioned
     }
 
+    enum GameState {WIN, LOOSE, RUNNING}
+
     int MIN_FIELD_HEIGHT = 2;
     int MIN_FIELD_WIDTH = 2;
 
-    int MAX_FIELD_HEIGHT = 30;
-    int MAX_FIELD_WIDTH = 30;
+    int MAX_FIELD_HEIGHT = 37;
+    int MAX_FIELD_WIDTH = 76;
 
     // Максимальное количество бомб не должно превышать HEIGHT * WIDTH * MAX_BOMB_RATIO
     double MAX_BOMB_RATIO = 0.25;
