@@ -1,7 +1,7 @@
 # MinerMVC_Java
 Miner game witten on Java using MVC pattern
 
-This copy of master branch before i made these changes in the program:
+This copy of master branch <strong><em>before i made</em></strong> these <strong><em>changes</em></strong> in the program:
 
 <ol>
   <li>Added GameState enum for game status and I replaced methods isWin(), isGameOver() at IMinerModel interface with method IGameSettings.GameState checkGameStatus(). Due these changes i made according changes at MinerGameLogic class. The isWin() method at MinerGameLogic class is still exists but now has private access modifier.</li>
